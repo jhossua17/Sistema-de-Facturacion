@@ -7,7 +7,7 @@ from tkinter import messagebox
 from tkinter import ttk,filedialog
 #archivo donde se almacenen los usuarios
 ARCHIVO_CLIENTES = "clientes.txt"
-DATA_FILE="Vendedores.txt"#archivo que guarda datos de vendedores
+ARCHIVO_VENDEDORES="Vendedores.txt"#archivo que guarda datos de vendedores
 
 def focus_next_widget(event):
     event.widget.tk_focusNext().focus()
@@ -103,6 +103,96 @@ tk.Button(root,text="Mostrar Clintes",command=mostrar_clientes).pack(pady=5)
 
 lista_clientes = tk.Text(root,height=10,width=100)
 lista_clientes.pack(pady=5)
+
+#area de vendedores
+def registrar_vendedor ():
+    id = entry_id.get()
+    vendedor = entry_vendedor.get()
+    direccion = entry_direccion.get()
+    telefono = entry_telefono.get()
+    email = entry_email.get()
+
+    if id and vendedor:
+        #verifica si el usuario ya existe
+        if verificar_vendedor_existente(vendedor):
+            messagebox.showerror("Error", "el vendedor ya existe")
+            return
+        with open(ARCHIVO_VENDEDORES, "a")as file:
+            file.write(f"{id},{vendedor},{direccion},{telefono},{telefono},{email}\n")
+
+        messagebox.showinfo("Exito", "vendedor registrado correctamente.")
+        entry_id.delete(0,tk.END)
+        entry_vendedor.delete(0,tk.END)
+        entry_direccion.delete(0, tk.END)
+        entry_telefono.delete(0, tk.END)
+        entry_email.delete(0, tk.END)
+
+    else:
+        messagebox.showerror("Error", "Por favor, complete todos los campos.")
+
+def verificar_vendedor_existente(vendedor):
+    if os.path.exists(ARCHIVO_VENDEDORES):
+        with open(ARCHIVO_VENDEDORES,"r") as file:
+            for linea in file:
+                datos = linea.strip().split(",")
+                if datos[0] == vendedor:
+                    return True
+    return False
+
+def mostrar_vendedores():
+    if os.path.exists(ARCHIVO_VENDEDORES):
+        with open(ARCHIVO_VENDEDORES,"r")as file:
+            lista_vendedores.delete("1.0",tk.END)# El valor "1.0" especifica la posicion inicial del texto a eliminar, 1 es la primera linea y 0 la primera columna
+            for linea in file:
+                    datos = linea.strip().split(",")
+                    lista_vendedores.insert(tk.END,f"Vendedor: ID:{datos[0]}, Nombre:{datos[1]}, Direccion:{datos[2]}, Tel.{datos[3]}, Correo:{datos[5]}\n")
+
+    else:
+        messagebox.showerror("Error","No hay vendedores registrados")
+
+#configuracion de la interfaz grafica
+
+root = tk.Tk()
+root.title("Gestion de Vendedores")
+root.geometry("650x650")
+
+
+#eiquetas y entradas de usuarios
+
+tk.Label(root,text="ID Vendedor:").pack() #<-Posiciona el widget en la ventana de manera automatica
+entry_id=tk.Entry(root)
+entry_id.pack()
+
+tk.Label(root,text="Nombre Vendedor: ").pack()
+entry_cliente=tk.Entry(root)
+entry_cliente.pack()
+
+tk.Label(root,text="Direccion: ").pack()
+entry_direccion=tk.Entry(root)
+entry_direccion.pack()
+
+tk.Label(root,text="Telefono: ").pack()
+entry_telefono=tk.Entry(root)
+entry_telefono.pack()
+
+tk.Label(root,text="E-Mail: ").pack()
+entry_email=tk.Entry(root)
+entry_email.pack()
+
+#botones de accion
+def hola():
+    pass
+
+tk.Button(root,text="Registrar vendedor",command=registrar_vendedor).pack(pady=5)
+tk.Button(root,text="Modificar Informacion de vendedor existente",command=hola).pack(pady=5)
+tk.Button(root,text="Eliminar Vendedor",command=hola).pack(pady=5)
+tk.Button(root,text="Buscar Vendedor ",command=hola).pack(pady=5)
+tk.Button(root,text="Mostrar Vendedor",command=mostrar_vendedores).pack(pady=5)
+
+#area de texto para listar usuarios
+
+lista_vendedores = tk.Text(root,height=10,width=100)
+lista_vendedores.pack(pady=5)
 
 productos = []
 
