@@ -43,7 +43,6 @@ def actualizar_lista():
         tree.insert("", "end", values=(producto["codigo"], producto["nombre"], producto["precio"], producto["stock"]))
 
 
-# Función para eliminar producto
 def eliminar_producto():
     selected_item = tree.selection()
     if not selected_item:
@@ -58,7 +57,6 @@ def eliminar_producto():
     actualizar_lista()
 
 
-# Función para modificar producto
 def modificar_producto():
     selected_item = tree.selection()
     if not selected_item:
@@ -76,7 +74,6 @@ def modificar_producto():
     limpiar_campos()
 
 
-# Función para buscar producto
 def buscar_producto():
     termino = entry_buscar.get().lower()
     for item in tree.get_children():
@@ -96,10 +93,9 @@ def limpiar_campos():
     entry_stock.delete(0, tk.END)
 
 
-# Configuración de la ventana
 root = tk.Tk()
 root.title("Gestión de Productos")
-root.geometry("600x500")
+root.geometry("800x500")
 
 # Etiquetas y campos de entrada
 frame = tk.Frame(root)
@@ -137,5 +133,5 @@ tree.heading("Precio", text="Precio")
 tree.heading("Stock", text="Stock")
 tree.pack(pady=10)
 
-# Iniciar aplicación
+
 root.mainloop()
