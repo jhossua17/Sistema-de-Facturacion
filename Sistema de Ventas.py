@@ -1,10 +1,13 @@
-
+519819819
+56565
 
 import os
 import tkinter as tk
 from tkinter import Menu
 from tkinter import messagebox
 from tkinter import ttk,filedialog
+
+DATA_FILE="Vendedores.txt"#archivo que guarda datos de vendedores
 
 def focus_next_widget(event):
     event.widget.tk_focusNext().focus()
