@@ -11,11 +11,10 @@ def focus_next_widget(event):
     return "break"
 
 
-# Lista para almacenar productos
+
 productos = []
 
 
-# Función para agregar producto
 def agregar_producto():
     codigo = entry_codigo.get()
     nombre = entry_nombre.get()
