@@ -1,4 +1,4 @@
-1111111111111111111
+
 
 import os
 import tkinter as tk
