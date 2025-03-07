@@ -1,2 +1,2 @@
-1,frijol,3.0,7
+1,frijol,3.0,1
 CPO,collar esmeralda,150.0,5

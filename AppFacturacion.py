@@ -64,15 +64,56 @@ def iniciar_sesion():
 
 # Función para mostrar el módulo según el rol
 def mostrar_modulo_segun_rol(rol):
-    frame_login.pack_forget()
+    frame_login.pack_forget()  # Ocultar el frame de inicio de sesión
+    notebook.pack(fill="both", expand=True)  # Mostrar el notebook
+
+    # Eliminar todas las pestañas existentes
+    for tab_id in notebook.tabs():
+        notebook.forget(tab_id)
+
     if rol == "admin":
-        notebook.pack(fill="both", expand=True)
+        # Mostrar todas las pestañas para el admin
+        notebook.add(frame_clientes, text="Clientes")
+        notebook.add(frame_vendedores, text="Vendedores")
+        notebook.add(frame_productos, text="Productos")
+        notebook.add(frame_pedidos, text="Pedidos")
+        notebook.add(frame_usuarios, text="Usuarios")
+        notebook.add(frame_factura, text="Facturas")
+        # Mostrar todos los pedidos para el admin
+        actualizar_lista_pedidos()
     elif rol == "vendedor":
-        frame_vendedores.pack(fill="both", expand=True)
-        notebook.pack()
-    elif rol == "cliente":
-        frame_clientes.pack(fill="both", expand=True)
-    boton_cerrar_sesion.pack(side="top", pady=5)
+        # Mostrar solo las pestañas de Clientes y Pedidos para el vendedor
+        notebook.add(frame_clientes, text="Clientes")
+        notebook.add(frame_pedidos, text="Pedidos")
+        notebook.add(frame_factura, text="Facturas")
+        # Filtrar pedidos para el vendedor
+        actualizar_lista_pedidos_vendedor()
+
+
+    boton_cerrar_sesion.pack(side="top", pady=5)  # Mostrar el botón de cerrar sesión
+
+# Función para actualizar la lista de pedidos para el vendedor
+def actualizar_lista_pedidos_vendedor():
+    for item in tree_pedidos.get_children():
+        tree_pedidos.delete(item)
+    for pedido in pedidos:
+        # Aquí puedes agregar lógica para filtrar pedidos del vendedor
+        if pedido["estado"] == "Pendiente":
+            tree_pedidos.insert("", "end",
+                                values=(pedido["cliente"], pedido["producto"], pedido["cantidad"], pedido["estado"]))
+
+
+# Función para actualizar la lista de pedidos para el cliente
+def actualizar_lista_pedidos_cliente():
+    for item in tree_pedidos.get_children():
+        tree_pedidos.delete(item)
+    for pedido in pedidos:
+        # Filtrar pedidos del cliente actual
+        if pedido[
+            "cliente"] == entry_usuario_login.get():  # Suponiendo que el nombre del cliente es el mismo que el usuario
+            tree_pedidos.insert("", "end",
+                                values=(pedido["cliente"], pedido["producto"], pedido["cantidad"], pedido["estado"]))
+
 
 # Función para cerrar sesión
 def cerrar_sesion():
@@ -119,6 +160,7 @@ def verificar_cliente_existente(cliente):
                 if datos[0] == cliente:
                     return True
     return False
+
 
 def mostrar_clientes():
     if os.path.exists(ARCHIVO_CLIENTES):
