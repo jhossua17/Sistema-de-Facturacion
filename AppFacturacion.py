@@ -547,7 +547,7 @@ def actualizar_lista_facturas():
 # Crear la ventana principal
 root = tk.Tk()
 root.title("Sistema de Facturación")
-root.geometry("800x600")
+root.geometry("1000x700")
 
 # Frame de inicio de sesión
 frame_login = ttk.Frame(root)
