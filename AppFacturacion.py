@@ -390,6 +390,159 @@ def despachar_pedido():
     actualizar_lista_pedidos()
     messagebox.showinfo("Éxito", "Pedido despachado correctamente")
 
+# Función para registrar factura
+def registrar_factura():
+    cliente_id = entry_cliente_id.get()
+    vendedor_id = entry_vendedor_id.get()
+    productos_seleccionados = obtener_productos_seleccionados()
+
+    if not cliente_id or not vendedor_id or not productos_seleccionados:
+        messagebox.showwarning("Campos Vacíos", "Todos los campos son obligatorios.")
+        return
+
+    # Validar cliente
+    cliente_valido = verificar_cliente_existente(cliente_id)
+    if not cliente_valido:
+        messagebox.showerror("Error", "El cliente seleccionado no existe.")
+        return
+
+    # Validar vendedor
+    vendedor_valido = verificar_vendedor_existente(vendedor_id)
+    if not vendedor_valido:
+        messagebox.showerror("Error", "El vendedor seleccionado no existe.")
+        return
+
+    # Validar productos y calcular el total
+    total_factura = 0
+    for producto, cantidad in productos_seleccionados:
+        if not verificar_producto_existente(producto):
+            messagebox.showerror("Error", f"El producto {producto} no existe.")
+            return
+        if not verificar_stock_producto(producto, cantidad):
+            messagebox.showerror("Error", f"No hay suficiente stock del producto {producto}.")
+            return
+        precio_unitario = obtener_precio_producto(producto)
+        total_factura += precio_unitario * cantidad
+
+        # Descontar stock
+        descontar_stock_producto(producto, cantidad)
+
+    # Crear y guardar la factura
+    fecha_factura = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    factura_detalles = f"Factura ID:{fecha_factura}, Cliente:{cliente_id}, Vendedor:{vendedor_id}, Total:{total_factura}\n"
+    for producto, cantidad in productos_seleccionados:
+        factura_detalles += f"Producto:{producto}, Cantidad:{cantidad}, Precio Unitario:{obtener_precio_producto(producto)}\n"
+
+    with open(ARCHIVO_FACTURAS, "a") as file:
+        file.write(factura_detalles)
+
+    messagebox.showinfo("Éxito", "Factura registrada correctamente.")
+    limpiar_campos_factura()
+    actualizar_lista_facturas()
+
+
+def obtener_productos_seleccionados():
+    productos_seleccionados = []
+    # Asumimos que tienes un control para seleccionar productos y cantidades
+    for item in tree_productos.selection():
+        producto_codigo = tree_productos.item(item, "values")[0]
+        cantidad = entry_cantidad.get()
+        productos_seleccionados.append((producto_codigo, int(cantidad)))
+    return productos_seleccionados
+
+
+# Función para verificar si un cliente existe
+def verificar_cliente_existente(cliente_id):
+    if os.path.exists(ARCHIVO_CLIENTES):
+        with open(ARCHIVO_CLIENTES, "r") as file:
+            for linea in file:
+                datos = linea.strip().split(",")
+                if datos[0] == cliente_id:
+                    return True
+    return False
+
+
+# Función para verificar si un vendedor existe
+def verificar_vendedor_existente(vendedor_id):
+    if os.path.exists(ARCHIVO_VENDEDORES):
+        with open(ARCHIVO_VENDEDORES, "r") as file:
+            for linea in file:
+                datos = linea.strip().split(",")
+                if datos[0] == vendedor_id:
+                    return True
+    return False
+
+
+# Función para verificar si un producto existe
+def verificar_producto_existente(codigo_producto):
+    if os.path.exists(ARCHIVO_PRODUCTOS):
+        with open(ARCHIVO_PRODUCTOS, "r") as file:
+            for linea in file:
+                datos = linea.strip().split(",")
+                if datos[0] == codigo_producto:
+                    return True
+    return False
+
+
+# Función para obtener el precio de un producto
+def obtener_precio_producto(codigo_producto):
+    if os.path.exists(ARCHIVO_PRODUCTOS):
+        with open(ARCHIVO_PRODUCTOS, "r") as file:
+            for linea in file:
+                datos = linea.strip().split(",")
+                if datos[0] == codigo_producto:
+                    return float(datos[2])  # Suponiendo que el precio está en la posición 2
+    return 0.0
+
+
+# Función para verificar si hay suficiente stock
+def verificar_stock_producto(codigo_producto, cantidad):
+    if os.path.exists(ARCHIVO_PRODUCTOS):
+        with open(ARCHIVO_PRODUCTOS, "r") as file:
+            for linea in file:
+                datos = linea.strip().split(",")
+                if datos[0] == codigo_producto:
+                    stock = int(datos[3])  # Suponiendo que el stock está en la posición 3
+                    return stock >= cantidad
+    return False
+
+
+# Función para descontar el stock
+def descontar_stock_producto(codigo_producto, cantidad):
+    lineas = []
+    with open(ARCHIVO_PRODUCTOS, "r") as file:
+        lineas = file.readlines()
+
+    with open(ARCHIVO_PRODUCTOS, "w") as file:
+        for linea in lineas:
+            datos = linea.strip().split(",")
+            if datos[0] == codigo_producto:
+                stock_actual = int(datos[3])
+                stock_actual -= cantidad
+                datos[3] = str(stock_actual)
+            file.write(",".join(datos) + "\n")
+
+
+# Función para mostrar facturas
+def mostrar_facturas():
+    if os.path.exists(ARCHIVO_FACTURAS):
+        with open(ARCHIVO_FACTURAS, "r") as file:
+            lista_facturas.delete("1.0", tk.END)
+            for linea in file:
+                lista_facturas.insert(tk.END, linea)
+    else:
+        messagebox.showerror("Error", "No hay facturas registradas")
+
+
+# Actualizar la lista de facturas
+def actualizar_lista_facturas():
+    lista_facturas.delete("1.0", tk.END)
+    if os.path.exists(ARCHIVO_FACTURAS):
+        with open(ARCHIVO_FACTURAS, "r") as file:
+            for linea in file:
+                lista_facturas.insert(tk.END, linea)
+
+
 # Crear la ventana principal
 root = tk.Tk()
 root.title("Sistema de Facturación")
@@ -562,6 +715,36 @@ combo_rol = ttk.Combobox(frame_usuarios, values=["admin", "vendedor", "cliente"]
 combo_rol.pack()
 
 tk.Button(frame_usuarios, text="Registrar Usuario", command=registrar_usuario).pack(pady=5)
+
+#Frame para Factura
+frame_factura = ttk.Frame(notebook)
+notebook.add(frame_factura, text="Facturas")
+
+tk.Label(frame_factura, text="ID Cliente:").grid(row=0, column=0)
+entry_cliente_id = tk.Entry(frame_factura)
+entry_cliente_id.grid(row=0, column=1)
+
+tk.Label(frame_factura, text="ID Vendedor:").grid(row=1, column=0)
+entry_vendedor_id = tk.Entry(frame_factura)
+entry_vendedor_id.grid(row=1, column=1)
+
+tk.Label(frame_factura, text="Cantidad de Producto:").grid(row=2, column=0)
+entry_cantidad = tk.Entry(frame_factura)
+entry_cantidad.grid(row=2, column=1)
+
+tk.Button(frame_factura, text="Registrar Factura", command=registrar_factura).grid(row=3, column=0, pady=5)
+tk.Button(frame_factura, text="Mostrar Facturas", command=mostrar_facturas).grid(row=3, column=1, pady=5)
+
+lista_facturas = tk.Text(frame_factura, height=10, width=100)
+lista_facturas.grid(pady=5)
+
+# Treeview de productos
+columns = ("Código", "Nombre", "Precio", "Stock")
+tree_productos = ttk.Treeview(frame_factura, columns=columns, show="headings", height=10)
+tree_productos.grid(pady=10)
+
+for col in columns:
+    tree_productos.heading(col, text=col)
 
 # Cargar datos al inicio
 cargar_productos()

@@ -1,1 +1,1 @@
-1,,1,2,6.0
+Factura ID:2025-03-07 11:32:33, Cliente:1, Vendedor:5605, Total:6.0
