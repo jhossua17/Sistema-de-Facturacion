@@ -2,7 +2,7 @@ import os
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
-from datetime import date
+from datetime import datetime
 
 # Archivos de almacenamiento
 ARCHIVO_CLIENTES = "clientes.txt"
