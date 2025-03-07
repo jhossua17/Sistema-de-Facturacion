@@ -2,3 +2,4 @@ admin,admin,admin
 Rive,Rive,vendedor
 Carlos,123,vendedor
 cliente,cliente,cliente
+1,2,admin
